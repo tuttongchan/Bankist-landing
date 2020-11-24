@@ -95,8 +95,8 @@ document.querySelector('.nav__links').addEventListener('click', function (e) {
   }
 });
 
+///////////////////////////////////////
 // Tabbed component
-
 tabsContainer.addEventListener('click', function (e) {
   const clicked = e.target.closest('.operations__tab');
 
@@ -117,6 +117,7 @@ tabsContainer.addEventListener('click', function (e) {
     .classList.add('operations__content--active');
 });
 
+///////////////////////////////////////
 // Menu fade animation
 const handleHover = function (e) {
   console.log(this, e.currentTarget);
@@ -130,50 +131,14 @@ const handleHover = function (e) {
       if (el !== link) el.style.opacity = this;
     });
     logo.style.opacity = this;
-  }
+
+    // Passing "argument" into handler
+    nav.addEventListener('mouseover', handleHover(0.5));
+    nav.addEventListener('mouseout', handleHover(1));
 };
-
-// nav.addEventListener('mouseover', function(e) {
-//   handleHover(e, 0.5);
-// });
-// nav.addEventListener('mouseout', function(e) {
-//   handleHover(e, 1);
-// });
-
-// Even better way to perform function from above
-// Passing "argument" into handler
-// nav.addEventListener('mouseover', handleHover.bind(0.5));
-// nav.addEventListener('mouseout', handleHover.bind(1));
-
-// // Sticky Navigation
-// const initialCoords = section1.getBoundingClientRect()
-// console.log(initialCoords);
-
-// // 'scroll' event in avalible on "window" NOT "document"
-// window.addEventListener('scroll', function() {
-//   console.log(window.scrollY);
-
-//   if(window.scrollY > initialCoords.top) nav.classList.add('sticky'); else nav.classList.remove('sticky');
-// })
 
 ///////////////////////////////////////
 // Sticky navigation: Intersection Observer API
-
-// const obsCallback = function(entries, observer) {
-//   entries.forEach(entry => {
-//     console.log(entry );
-//   })
-// };
-
-// const obsOptions = {
-//   root: null,
-//   // "threshold" - what we want to have visible
-//   threshold: [0, 1, 0.2],
-// };
-
-// const observer = new IntersectionObserver(obsCallback, obsOptions);
-// observer.observe(section1)
-
 const header = document.querySelector('.header');
 const navHeight = nav.getBoundingClientRect().height;
 
@@ -240,61 +205,109 @@ const imgObserver = new IntersectionObserver(loadImg, {
   // "root: null" - setting to the entire viewport
   root: null,
   threshold: 0,
-  rootMargin: '-200px',
+  rootMargin: '200px',
 });
 
 imgTargets.forEach(img => imgObserver.observe(img));
 
+///////////////////////////////////////
 // Slider
-const slides = document.querySelectorAll('.slide');
-const btnLeft = document.querySelector('.slider__btn--left');
-const btnRight = document.querySelector('.slider__btn--right');
+const slider = function () {
+  const slides = document.querySelectorAll('.slide');
+  const btnLeft = document.querySelector('.slider__btn--left');
+  const btnRight = document.querySelector('.slider__btn--right');
+  const dotContainer = document.querySelector('.dots');
 
-let curSlide = 0;
-// 0 based
-const maxSlide = slides.length;
+  let curSlide = 0;
+  // 0 based
+  const maxSlide = slides.length;
 
-// const slider = document.querySelector('.slider');
-// slider.style.transform = 'scale(0.4) translateX(-800px)';
-// slider.style.overflow = 'visible';
+  // Functions
+  const createDots = function () {
+    slides.forEach(function (_, i) {
+      dotContainer.insertAdjacentHTML(
+        'beforeend',
+        `<button class="dots__dot" data-slide="${i}"></button>`
+      );
+    });
+  };
 
-const goToSlide = function(slide) {
-  slides.forEach(
-    // "s" = styles, "i" = index
-    (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
-  );
-  // curSlide = 1: -100%, 100%, 100%, 200%
-}
-goToSlide(0)
+  const activateDot = function (slide) {
+    document
+      .querySelectorAll('.dots__dot')
+      .forEach(dot => dot.classList.remove('dots__dot--active'));
 
-// Next slide
-const nextSlide = function() {
-  if(curSlide === maxSlide - 1) {
-    curSlide = 0;
-  } else {
-    curSlide++;
-  }
+    document
+      .querySelector(`.dots__dot[data-slide="${slide}"]`)
+      .classList.add('dots__dot--active');
+  };
 
-  goToSlide(curSlide)
-}
+  const goToSlide = function (slide) {
+    slides.forEach(
+      // "s" = styles, "i" = index
+      (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
+    );
+    // curSlide = 1: -100%, 100%, 100%, 200%
+  };
 
-const prevSlide = function(){
-  if(curSlide === 0) {
-    curSlide = maxSlide -1;
-  } else {
-    curSlide--;
-  }
-  goToSlide(curSlide);
-}
+  // Next slide
+  const nextSlide = function () {
+    if (curSlide === maxSlide - 1) {
+      curSlide = 0;
+    } else {
+      curSlide++;
+    }
 
-btnRight.addEventListener('click', nextSlide);
-btnLeft.addEventListener('click', prevSlide);
+    goToSlide(curSlide);
+    activateDot(curSlide);
+  };
+
+  const prevSlide = function () {
+    if (curSlide === 0) {
+      curSlide = maxSlide - 1;
+    } else {
+      curSlide--;
+    }
+    goToSlide(curSlide);
+    activateDot(curSlide);
+  };
+
+  const init = function () {
+    goToSlide(0);
+    createDots(0);
+
+    activateDot(0);
+  };
+  init();
+
+  // Event handlers
+  btnRight.addEventListener('click', nextSlide);
+  btnLeft.addEventListener('click', prevSlide);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') prevSlide();
+    e.key === 'ArrowRight' && nextSlide();
+  });
+
+  dotContainer.addEventListener('click', function (e) {
+    if (e.target.classList.contains('dots__dot')) {
+      console.log('DOT');
+      const { slide } = e.target.dataset;
+      goToSlide(slide);
+      activateDot(slide);
+    }
+  });
+};
+slider();
 
 ///////////////////////////////////////
 ///////////////////////////////////////
 ///////////////////////////////////////
 
 /*
+///////////////////////////////////////
+// Selecting, Creating, and Deleting Elements
+
 // Selecting elements
 console.log(document.documentElement);
 console.log(document.head);
@@ -390,9 +403,6 @@ logo.classList.contains('c');
 // Don't use bcs it overides existing classes
 logo.className = 'jonas'
 
-
-
-
 ///////////////////////////////////////
 // Types of Events and Event Handlers
 
@@ -481,7 +491,38 @@ console.log(h1.parentElement.children);
 [...h1.parentElement.children].forEach(function (el) {
   if (el !== h1) el.style.transform = 'scale(0.5)';
 });
-*/
 
 ///////////////////////////////////////
 // Sticky Navigation
+const initialCoords = section1.getBoundingClientRect()
+console.log(initialCoords);
+
+// 'scroll' event in avalible on "window" NOT "document"
+window.addEventListener('scroll', function() {
+  console.log(window.scrollY);
+
+  if(window.scrollY > initialCoords.top) nav.classList.add('sticky'); else nav.classList.remove('sticky');
+})
+
+///////////////////////////////////////
+// Sticky navigation: Intersection Observer API
+
+const obsCallback = function(entries, observer) {
+  entries.forEach(entry => {
+    console.log(entry );
+  })
+};
+
+const obsOptions = {
+  root: null,
+  // "threshold" - what we want to have visible
+  threshold: [0, 1, 0.2],
+};
+
+const observer = new IntersectionObserver(obsCallback, obsOptions);
+observer.observe(section1)
+*/
+
+document.addEventListener('DOMContentLoaded', function(e) {
+  console.log('HTML parsed and DOM tree built!', e);
+});
